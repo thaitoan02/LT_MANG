@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbox</title>
+    <link rel="stylesheet" href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inbox.css') }}">
+<!--    <script src="/socket.io/socket.io.js"></script>-->
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo-details">
+                <img src="{{ url_for('static', filename='img/UTH-LOGO.png') }}" alt="" class="icon">
+                <div class="logo-name">Mail Security</div>
+                <i class='bx bx-menu' id="btn"></i>
+            </div>
+            <ul class="nav-list">
+                <li>
+                    <a class="mail-create">
+                        <i class='bx bx-message-square-edit'></i>
+                        <span class="links-name">Soạn thư</span>
+                    </a>
+                    <span class="tooltip">Soạn thư</span>
+                </li>
+                <li>
+                    <a class="mail-received">
+                        <i class='bx bxs-inbox'></i>
+                        <span class="links-name">Hộp thư đến</span>
+                    </a>
+                    <span class="tooltip">Hộp thư đến</span>
+                </li>
+                <li>
+                    <a class="mail-send">
+                        <i class='bx bx-send'></i>
+                        <span class="links-name">Thư đã gửi</span>
+                    </a>
+                    <span class="tooltip">Thư đã gửi</span>
+                </li>
+                <li>
+                    <a class="mail-trash">
+                        <i class='bx bx-trash'></i>
+                        <span class="links-name">Thùng rác</span>
+                    </a>
+                    <span class="tooltip">Thùng rác</span>
+                </li>
+                <li class="log-out">
+                    <a href="{{ url_for('logout') }}">
+                        <i class="bx bx-log-out" id="log-out"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <section class="home-section">
+            <div class="header">
+                <!-- Search -->
+                <div class="search">
+                    <form method="GET" action="{{ url_for('inbox') }}">
+                        <input type="text" name="search" placeholder="Tìm kiếm trong thư...">
+                        <button type="submit">
+                            <i class='bx bx-search'></i>
+                        </button>
+                    </form>
+                </div>
+                <!-- Account -->
+                <div class="account">
+                    <div class="profile-details">
+                        <img src="{{ url_for('static', filename='img/avt.webp') }}" alt="profileImg">
+                    </div>
+                    <form action="" class="form-account">
+                        <div class="info">
+                            <div class="main-info">
+                                <h3 class="title-form">Thông tin cá nhân</h3>
+                                <input type="text" name="fullname" id="fullname" class="full-name" placeholder="Nguyễn Văn A" value="{{ session['username'] }}"  readonly />
+                                <input type="email" name="fullemail" id="fullemail" class="full-email" placeholder="abc@gmail.com" value="{{ session['email'] }}" readonly />
+                            </div>
+                            <img src="{{ url_for('static', filename='img/avt.webp') }}" alt="profileImg">
+                        </div>
+                        <div class="recover-key">
+                            <button>Đổi mật khẩu</button>
+                        </div>
+                    </form>
+                    <form action="{{ url_for('change_password') }}" method="POST" class="form-recover-key">
+                        <div class="content-recover-key">
+                            <div class="info-recover-key">
+                                <div class="close-recover-key">
+                                    <i class='bx bx-x' id="close-change"></i>
+                                </div>
+                                <div class="head-recover-key">
+                                    <h3>Đổi mật khẩu</h3>
+                                    <img src="{{ url_for('static', filename='img/recovery.png') }}" alt="">
+                                </div>
+                                <div>
+                                    <input type="email" id="email" name="email" placeholder="abc@gmail.com" required />
+                                </div>
+                                <div>
+                                    <input type="password" id="ex-password" name="ex-password" placeholder="Nhập mật khẩu cũ" required />
+                                </div>
+                                <div>
+                                    <input type="password" id="password" name="password" placeholder="Nhập mật khẩu mới" required />
+                                </div>
+                                <div>
+                                    <input type="password" id="new_password" name="new_password" placeholder="Nhập lại mật khẩu mới" required />
+                                </div>
+                                <div class="button-submit">
+                                    <button type="submit">Xác nhận</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal thành công -->
+            <div id="changePasswordSuccessModal" class="modal">
+                <div class="modal-content">
+                    <h2>Thành công!</h2>
+                    <p id="successChangePasswordMessage"></p>
+                    <button onclick="closeChangePasswordSuccessModal()">OK</button>
+                </div>
+            </div>
+
+            <!-- Modal lỗi -->
+            <div id="changePasswordErrorModal" class="modal">
+                <div class="modal-content">
+                    <h2>Lỗi!</h2>
+                    <p id="errorChangePasswordMessage"></p>
+                    <button onclick="closeChangePasswordErrorModal()">Đóng</button>
+                </div>
+            </div>
+
+            <!-- Thư đến -->
+            <div class="form-mail-received">
+                <div class="head-received">
+                    <span class="mail-received">Hộp thư đến</span>
+                    <div class="head-icon">
+                        <i class='bx bx-trash' id="delete-icon-1" onclick="moveToTrash('received')"></i>
+                        <i class='bx bx-dots-vertical-rounded'></i>
+                    </div>
+                </div>
+                <table class="email-table">
+                    <thead>
+                        <tr>
+                            <th class="col-checkbox"><input type="checkbox" id="select-all-received"></th>
+                            <th>Người gửi</th>
+                            <th>Chủ đề</th>
+                            <th>Thời gian</th>
+                            <th>Nội dung</th>
+                            <th class="col-action">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for email in received_emails %}
+                        <tr class="email-row {% if email.is_read %}read{% else %}unread{% endif %}" id="email1-{{ email.id }}">
+                            <td><input type="checkbox" class="email-checkbox-received" data-email-id="{{ email.id }}"></td>
+                            <td>{{ email.sender_email }}</td>
+                            <td>{{ email.subject }}</td>
+                            <td>{{ email.local_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <!-- Nội dung đã giải mã, giới hạn số từ -->
+                            <td>
+                                {% if '----Forwarded message----' in email.decrypted_body %}
+                                    {{ email.decrypted_body.split('----Forwarded message----')[0] | truncate(50) | e }}
+                                {% else %}
+                                    {{ email.decrypted_body | truncate(50) | e }}
+                                {% endif %}
+                            </td>
+                            <td class="decode">
+                                <a href="{{ url_for('decrypt_email', email_id=email.id) }}" class="btn-show-decode">
+                                    <i class="bx bx-envelope-open"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination-controls"></div>
+            </div>
+
+            <!-- Thư đã gửi -->
+            <div class="form-mail-send">
+                <div class="head-send">
+                    <span class="mail-send">Thư đã gửi</span>
+                    <div class="head-icon">
+                        <i class='bx bx-trash' id="delete-icon-2" onclick="moveToTrash('sent')"></i>
+                        <i class='bx bx-dots-vertical-rounded'></i>
+                    </div>
+                </div>
+                <table class="email-table">
+                    <thead>
+                        <tr>
+                            <th class="col-checkbox"><input type="checkbox" id="select-all-send"></th>
+                            <th>Người nhận</th>
+                            <th>Chủ đề</th>
+                            <th>Thời gian</th>
+                            <th class="col-action">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for email in sent_emails %}
+                        {% if not email.is_deleted %}
+                        <tr id="email-{{ email.id }}">
+                            <td><input type="checkbox" class="email-checkbox-send" data-email-id="{{ email.id }}"></td>
+                            <td>{{ email.receiver_email }}</td>
+                            <td>{{ email.subject }}</td>
+                            <td>{{ email.local_time }}</td>
+                            <td class="see">
+                                <a href="{{ url_for('decrypt_email', email_id=email.id) }}" class="btn-show-details">
+                                    <i class="bx bx-envelope-open"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination-controls"></div>
+            </div>
+
+            <!-- Thùng rác -->
+            <div class="form-trash-mail">
+                <div class="head-trash">
+                    <span class="mail-trash">Thùng rác</span>
+                    <div class="head-icon">
+                        <i class='bx bx-trash' id="delete-icon-3"></i>
+                        <i class='bx bx-dots-vertical-rounded'></i>
+                    </div>
+                </div>
+                <table class="email-table">
+                    <thead>
+                        <tr>
+                            <th class="col-checkbox"><input type="checkbox" id="select-all-trash"></th>
+                            <th colspan="3" class="col-trash">
+                                Thư ở trong thư mục Thư rác hơn 30 ngày sẽ tự động bị xóa.
+                                <a href="#" id="delete-now">Xóa ngay bay giờ</a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for email in trash_emails %}
+                        <tr data-email-id="{{ email.id }}">
+                            <td><input type="checkbox" class="email-checkbox-trash"></td>
+                            <td class="col-trash-1">{{ email.sender_email }}</td>
+                            <td class="col-trash-2">{{ email.subject }}</td>
+                            <td class="col-trash-3">{{ email.local_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination-controls"></div>
+            </div>
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-info" role="alert">
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Soạn thư -->
+            <div class="create-mail" id="create-mail">
+                <form action="{{ url_for('send_email') }}" class="form-create-mail" method="POST" enctype="multipart/form-data" onsubmit="updateBody()">
+                    <div class="head-create-mail">
+                        <p class="title-head-create-mail">Thư mới</p>
+                        <div class="create-mail-icon">
+                            <i class='bx bx-x' id="close-compose"></i>
+                        </div>
+                    </div>
+
+                    <input type="email" name="recipient" id="recipient" class="form-control" placeholder="Người nhận" required />
+                    <input type="text" name="subject" id="subject" class="form-control" placeholder="Tiêu đề" required />
+                    <div id="main" class="form-control-main" contenteditable="true">
+                    <div class="file-list-container" id="file-list-container"></div>
+                        </div>
+                    <input type="hidden" name="body" id="hidden-body" required />
+
+                    <div class="footer-create-mail">
+                        <button type="submit">Gửi</button>
+                        <label for="attachment-create" class="file-label">
+                            <i class='bx bx-file'></i>
+                        </label>
+
+                        <input type="file" id="attachment-create" name="attachment" multiple>
+                        <div id="file-dropdown-create"></div>
+                        <div id="file-count-create">0 tệp đã chọn</div>
+
+                    </div>
+                </form>
+            </div>
+
+            <!--Đọc mail đến-->
+            <div id="formDecode" class="form-decode">
+                <h1>Nội dung Email</h1>
+                <p>Người gửi: <span id="senderEmail"></span></p>
+                <p>Tiêu đề: <span id="subjectEmail"></span></p>
+                <p>Thời gian: <span id="timeEmailReceived"></span></p>
+                <div id="bodyContent">
+                    <p>Nội dung:</p>
+                    <div class="content">
+                        <span id="decryptedBody"></span>
+                    </div>
+                </div>
+                <div id="noDecryptedBody">
+                    <p>Không có nội dung giải mã.</p>
+                </div>
+                <div id="attachmentsContent">
+                    <p>Tệp đính kèm:</p>
+                    <div id="attachmentsList"></div>
+                </div>
+                <div id="noAttachmentsContent">
+                    <p>Không có tệp đính kèm.</p>
+                </div>
+                <div class="position-end-decode">
+                    <div class="end-decode">
+                        <div class="rep-mail">
+                            <a class="btn-rep-email-received">
+                                <i class="bx bx-share"></i>
+                                <span>Trả lời</span>
+                            </a>
+                            <a class="btn-forward-email-received">
+                                <i class="bx bx-share"></i>
+                                <span>Chuyển tiếp</span>
+                            </a>
+                        </div>
+                        <div class="footer-icon">
+                            <a>
+                                <button type="button" id="closeFormDecode"><i class='bx bx-arrow-back'></i></button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-rep-received" id="form-rep-received">
+                    <form action="{{ url_for('send_email') }}" class="form-rep-receiver" method="POST" enctype="multipart/form-data" onsubmit="updateBody()">
+                        <div class="head-rep-received">
+                            <p class="title-head-rep-received" id="title-received"></p>
+                            <div class="rep-received-icon">
+                                <i class='bx bx-x' id="close-rep-received"></i>
+                            </div>
+                        </div>
+    
+                        <input type="email" name="recipient" id="recipient-received" class="form-control" placeholder="Người nhận" required />
+                        <input type="text" name="subject" id="subject-received" class="form-control" placeholder="Tiêu đề" required />
+                        <div id="main-received" class="form-control-main" contenteditable="true"></div>
+
+                        <input type="hidden" name="body" id="hidden-body-received" required />
+    
+                        <div class="footer-rep-received">
+                            <button type="submit">Gửi</button>
+                            <label for="attachment-received" class="file-label">
+                                <i class='bx bx-file'></i>
+                            </label>
+                            <input type="file" id="attachment-received" name="attachment" multiple>
+                            <div id="file-dropdown-received"></div>
+                            <div id="file-count-received">0 tệp đã chọn</div>
+                        </div>
+                    </form>
+                </div> 
+            </div>
+
+            <!--Đọc thư đã gửi-->
+            <div id="formSeen" class="form-seen">
+                <h1>Nội dung Email đã gửi</h1>
+                <p>Thông tin: <span id="messEmail"></span></p>
+                <p>Người gửi: <span id="sendEmail"></span></p>
+                <p>Người nhận: <span id="receiverEmail"></span></p>
+                <p>Thời gian: <span id="timeEmailSent"></span></p>
+                <p>Tiêu đề: <span id="subjectSeen"></span></p>
+                <div id="bodySeenContent">
+                    <p>Nội dung:</p>
+                    <div class="content">
+                        <span id="decryptedBodySeen"></span>
+                    </div>
+                </div>
+                <div id="noDecryptedBodySeen">
+                    <p>Không có nội dung giải mã.</p>
+                </div>
+                <div id="attachmentsSeenContent">
+                    <p>Tệp đính kèm:</p>
+                    <div id="attachmentsSeenList"></div>
+                </div>
+                <div id="noAttachmentsSeenContent">
+                    <p>Không có tệp đính kèm.</p>
+                </div>
+
+                <div class="position-end-seen">
+                    <div class="end-seen">
+                        <div class="rep-mail">
+                            <a class="btn-rep-email-sent">
+                                <i class="bx bx-share"></i>
+                                <span>Trả lời</span>
+                            </a>
+                            <a class="btn-forward-email-sent">
+                                <i class="bx bx-share"></i>
+                                <span>Chuyển tiếp</span>
+                            </a>
+                        </div>
+                        <div class="footer-icon">
+                            <a>
+                                <button type="button" id="close-form-seen"><i class='bx bx-arrow-back'></i></button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+ 
+                <!--Form trả lời và chuyển tiếp của thư đã gửi-->
+                <div class="form-rep-sent" id="form-rep-sent">
+                    <form action="{{ url_for('send_email') }}" class="form-rep-seen" method="POST" enctype="multipart/form-data" onsubmit="updateBody()">
+                        <div class="head-rep-sent">
+                            <p class="title-head-rep-sent" id="title-sent"></p>
+                            <div class="rep-sent-icon">
+                                <i class='bx bx-x' id="close-rep-seen"></i>
+                            </div>
+                        </div>
+
+    
+                        <input type="email" name="recipient" id="recipient-sent" class="form-control" placeholder="Người nhận" required />
+                        <input type="text" name="subject" id="subject-sent" class="form-control" placeholder="Tiêu đề" required />
+                        <div id="main-sent" class="form-control-main" contenteditable="true">
+
+                        </div>
+                        <input type="hidden" name="body" id="hidden-body-sent" required />
+
+    
+                        <div class="footer-rep-seen">
+                            <button type="submit">Gửi</button>
+                            <label for="attachment-sent" class="file-label">
+                                <i class='bx bx-file'></i>
+                            </label>
+                            <input type="file" id="attachment-sent" name="attachment" multiple>
+                            <div id="file-dropdown-sent"></div>
+                            <div id="file-count-sent">0 tệp đã chọn</div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="{{ url_for('static', filename='js/inbox-script.js') }}"></script>
+
+</body>
+</html>
