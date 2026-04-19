@@ -1,0 +1,8 @@
+1|Lap Trinh C++ Co Ban|Bjarne Stroustrup|NXB KHKT|2020|Lap trinh|5|4|A1-01
+2|Co So Du Lieu|Ramez Elmasri|NXB GD|2018|CSDL|3|2|A1-02
+3|Giai Tich 1|Nguyen Dinh Tri|NXB DHQG|2019|Toan hoc|4|4|B2-01
+4|Tri Tue Nhan Tao|Stuart Russell|NXB KHKT|2021|AI|2|1|A2-01
+5|Cau Truc Du Lieu & Giai Thuat|Thomas Cormen|NXB DHQG|2017|Lap trinh|3|3|A1-03
+6|Lap Trinh Python|Eric Matthes|NXB KHKT|2022|Lap trinh|4|4|A1-04
+7|Machine Learning Co Ban|Vu Huu Tiep|NXB KHKT|2021|AI|3|3|A2-02
+8|Giao Tiep Hieu Qua|Dale Carnegie|NXB Tre|2018|Ky nang mem|5|5|C1-01

@@ -1,0 +1,193 @@
+===========================================================
+  HUONG DAN CHAY CHUONG TRINH - HE THONG QUAN LY THU VIEN
+            (Phien ban OOP - C++)
+===========================================================
+
+=== CAU TRUC THU MUC ===
+
+  oop_library/
+  ├── library.h         <- Khai bao tat ca class (header chinh)
+  ├── main.cpp          <- Diem khoi chay chuong trinh
+  ├── utils.cpp         <- Ham tien ich (ngay, hash, clearscreen)
+  ├── users.cpp         <- Class User, Reader, Librarian, Admin
+  ├── fileio.cpp        <- Class FileManager (doc/ghi file)
+  ├── system.cpp        <- Class LibrarySystem (toan bo logic)
+  ├── Makefile          <- File build (danh cho Linux/Mac)
+  └── data/
+      ├── users.txt     <- Du lieu tai khoan
+      ├── books.txt     <- Du lieu sach
+      ├── borrows.txt   <- Du lieu phieu muon
+      └── fines.txt     <- Du lieu tien phat
+
+
+=== BUOC 1: BIEN DICH (COMPILE) ===
+
+--- Tren Linux / macOS ---
+  Mo terminal, vao thu muc oop_library/, chay:
+
+    make
+
+  hoac chay thu cong:
+
+    g++ -std=c++17 -o library main.cpp utils.cpp users.cpp fileio.cpp system.cpp
+
+--- Tren Windows (MinGW / MSYS2) ---
+  Mo Command Prompt hoac PowerShell, vao thu muc oop_library/:
+
+    g++ -std=c++17 -o library.exe main.cpp utils.cpp users.cpp fileio.cpp system.cpp
+
+
+=== BUOC 2: CHAY CHUONG TRINH ===
+
+--- Linux / macOS ---
+    ./library
+
+--- Windows ---
+    library.exe
+
+  Luong y: chay tu DUNG TRONG thu muc oop_library/
+  (de chuong trinh tim duoc thu muc data/)
+
+
+=== TAI KHOAN TEST MAC DINH ===
+
+  ┌─────────────────────────────────────────────────────┐
+  │  VAI TRO      │  USERNAME  │  PASSWORD  │  STATUS   │
+  ├─────────────────────────────────────────────────────┤
+  │  Admin        │  admin     │  admin123  │  active   │
+  │  Thu thu      │  thuthu    │  thu123    │  active   │
+  │  Doc gia 1    │  docgia1   │  doc123    │  active   │
+  │  Doc gia 2    │  docgia2   │  doc123    │  active   │
+  │  Doc gia 3    │  docgia3   │  doc123    │  LOCKED   │
+  └─────────────────────────────────────────────────────┘
+  * docgia3 bi khoa de test chuc nang khoa/mo khoa tai khoan
+
+
+=== DU LIEU SACH MAU ===
+
+  ID  Ten sach                          The loai    So luong  Con lai
+  --  --------------------------------  ----------  --------  -------
+  1   Lap Trinh C++ Co Ban              Lap trinh   5         4
+  2   Co So Du Lieu                     CSDL        3         2
+  3   Giai Tich 1                       Toan hoc    4         4
+  4   Tri Tue Nhan Tao                  AI          2         1
+  5   Cau Truc Du Lieu & Giai Thuat     Lap trinh   3         3
+  6   Lap Trinh Python                  Lap trinh   4         4
+  7   Machine Learning Co Ban           AI          3         3
+  8   Giao Tiep Hieu Qua               Ky nang mem 5         5
+
+  * Sach ID 1, 2, 4 dang co nguoi muon (so con lai < tong so)
+
+
+=== DU LIEU PHIEU MUON MAU ===
+
+  Phieu #1 - docgia1 (Nguyen Van A)
+    Muon: 01/04/2026 | Han: 15/04/2026 | Trang thai: borrowing
+    Sach: Lap Trinh C++ Co Ban (x1), Tri Tue Nhan Tao (x1)
+
+  Phieu #2 - docgia2 (Tran Thi B)
+    Muon: 10/03/2026 | Han: 24/03/2026 | Tra: 05/04/2026 | Trang thai: returned
+    Sach: Co So Du Lieu (x1)
+
+  Phieu #3 - docgia1 (Nguyen Van A)
+    Muon: 01/03/2026 | Han: 15/03/2026 | Tra: 20/03/2026 | Trang thai: overdue
+    Sach: Co So Du Lieu (x1)
+    -> Phat: 10.000 VND (tra tre 5 ngay), chua thanh toan
+
+
+=== KICH BAN TEST CHUC NANG ===
+
+--- KICH BAN 1: Dang nhap voi cac vai tro khac nhau ---
+  1. Dang nhap bang admin    / admin123  -> Vao menu Admin
+  2. Dang nhap bang thuthu   / thu123    -> Vao menu Thu Thu
+  3. Dang nhap bang docgia1  / doc123    -> Vao menu Doc Gia
+  4. Thu dang nhap docgia3   / doc123    -> Bao loi bi khoa
+
+--- KICH BAN 2: Test tim kiem sach (Doc Gia) ---
+  1. Dang nhap: docgia1 / doc123
+  2. Chon [1] Tim kiem sach
+  3. Chon [1] Tim theo ten -> nhap "lap" -> tim thay 3 sach C++, Python, Cau truc
+  4. Chon [2] Tim theo the loai -> nhap "AI" -> tim thay 2 sach
+
+--- KICH BAN 3: Tao phieu muon moi (Thu Thu) ---
+  1. Dang nhap: thuthu / thu123
+  2. Chon [3] Quan ly muon/tra sach
+  3. Chon [2] Tao phieu muon sach
+  4. Nhap ID doc gia: 4 (docgia2 - hien chua co phieu dang muon)
+  5. Nhap ID sach: 3, so luong: 1
+  6. Nhap ID sach: 0 (ket thuc)
+  -> Phieu muon moi duoc tao
+
+  * Neu thu tao phieu cho docgia1 (ID=3): se bao loi vi con phieu #1 chua tra
+
+--- KICH BAN 4: Xac nhan tra sach va tinh phat (Thu Thu) ---
+  1. Dang nhap: thuthu / thu123
+  2. Chon [3] Quan ly muon/tra sach
+  3. Chon [3] Xac nhan tra sach
+  4. Nhap ID phieu muon: 1
+  -> Neu hom nay sau 15/04/2026: se tinh phat tu dong
+  -> Neu truoc han: tra binh thuong
+
+--- KICH BAN 5: Thanh toan tien phat (Thu Thu) ---
+  1. Dang nhap: thuthu / thu123
+  2. Chon [4] Quan ly tien phat
+  3. Chon [1] Xem danh sach -> thay Phieu phat #1: 10.000 VND, unpaid
+  4. Chon [2] Xac nhan thanh toan -> nhap ID: 1 -> xac nhan y
+
+--- KICH BAN 6: Them sach moi (Thu Thu) ---
+  1. Dang nhap: thuthu / thu123
+  2. Chon [1] Quan ly sach
+  3. Chon [3] Them sach moi -> dien thong tin
+  -> Sach moi duoc them voi ID tu dong tang
+
+--- KICH BAN 7: Quan ly tai khoan (Admin) ---
+  1. Dang nhap: admin / admin123
+  2. Chon [1] Quan ly tai khoan
+  3. Chon [1] Xem danh sach -> thay 5 tai khoan (co 1 bi khoa)
+  4. Chon [4] Mo khoa tai khoan -> nhap ID: 5 (docgia3) -> mo khoa
+  5. Chon [3] Khoa tai khoan -> nhap ID: 5 -> khoa lai
+
+--- KICH BAN 8: Bao cao thong ke (Admin) ---
+  1. Dang nhap: admin / admin123
+  2. Chon [4] Xem bao cao thong ke
+  3. Chon [1] Tinh trang sach -> xem tong quan
+  4. Chon [2] Sach qua han tra -> kiem tra phieu #1 co qua han chua
+  5. Chon [3] Top nguoi muon nhieu nhat -> docgia1 dung dau (2 phieu)
+
+--- KICH BAN 9: Doi mat khau ---
+  1. Dang nhap voi bat ky tai khoan nao
+  2. Chon [4] (hoac [5] tuy menu) Doi mat khau
+  3. Nhap mat khau cu -> mat khau moi -> xac nhan
+  -> Luu ngay vao file
+
+--- KICH BAN 10: Dang ky tai khoan moi ---
+  1. Tu man hinh dang nhap, chon [2] Dang ky tai khoan moi
+  2. Chon [1] Doc gia
+  3. Dien ho ten, username, password (>=4 ky tu), email
+  -> Tai khoan moi duoc tao, co the dang nhap ngay
+
+
+=== GHI CHU KY THUAT ===
+
+  - Du lieu luu trong thu muc data/ o dinh dang text, phan cach boi |
+  - Password duoc ma hoa bang thuat toan hash don gian truoc khi luu
+  - Gioi han muon: toi da 5 cuon / 1 phieu; 1 doc gia chi 1 phieu chua tra
+  - Han muon mac dinh: 14 ngay; Phi phat: 2.000 VND/ngay tre
+  - Xoa sach: chi duoc xoa khi khong co ai dang muon
+  - Xoa doc gia: chi duoc xoa khi khong dang muon sach
+
+
+=== CAU TRUC CLASS OOP ===
+
+  User (abstract base)
+  ├── Reader    : searchBook(), viewBorrowHistory()
+  ├── Librarian : addBook(), createBorrowSlip(), confirmReturn()
+  └── Admin     : manageUser(), lockUser(), unlockUser()
+
+  Book          : isAvailable(), display(), displaySummary()
+  BorrowSlip    : calculateLateDays(), calculateFine()
+  Fine          : markPaid(), calculateAmount()
+  FileManager   : static saveAll/loadAll (users/books/borrows/fines)
+  LibrarySystem : Dieu phoi toan bo he thong, vong lap chinh
+
+===========================================================
